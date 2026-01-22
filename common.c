@@ -110,16 +110,20 @@ const struct file_operations fops = {
 	.write = echo_write,
 };
 
-int allocate_buffer(size_t size)
+int allocate_buffer(uint size)
 {
 	/*
-	 * Keep the size range reasonable
+	 * Keep the size range reasonable and aligned to a power of two
 	 */
+
+	size = roundup_pow_of_two(size);
 
 	if (size < FIFO_SIZE_DEFAULT)
 		size = FIFO_SIZE_DEFAULT;
 	else if(size > FIFO_SIZE_MAX)
 		size = FIFO_SIZE_MAX;
+
+	fifo_size = size;
 
 	return kfifo_alloc(&fifo, size, GFP_KERNEL);
 }

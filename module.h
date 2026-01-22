@@ -13,6 +13,16 @@ MODULE_AUTHOR("Jason Lethbridge");
 MODULE_DESCRIPTION("Character Device Echo Example");
 MODULE_VERSION("1.0");
 
-module_param(fifo_size, uint, 0444);
 MODULE_PARM_DESC(fifo_size, "Echo buffer size in bytes");
 
+static int fifo_size_get(char *buf, const struct kernel_param *kp)
+{
+	return sysfs_emit(buf, "%u\n", fifo_size);
+}
+
+static const struct kernel_param_ops fifo_size_ops = {
+	.set = param_set_uint,
+	.get = fifo_size_get,
+};
+
+module_param_cb(fifo_size, &fifo_size_ops, &fifo_size, 0444);

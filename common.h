@@ -1,4 +1,5 @@
 #include <linux/kfifo.h>
+#include <linux/log2.h>
 #include <linux/mutex.h>
 #include <linux/poll.h>
 
@@ -15,4 +16,4 @@ extern wait_queue_head_t fifo_queue; /* The queue to wake up poll listeners with
 
 extern const struct file_operations fops;
 
-extern int allocate_buffer(size_t size);
+extern int allocate_buffer(uint size);
