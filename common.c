@@ -10,15 +10,15 @@ static unsigned int echo_poll(struct file *file, poll_table *wait)
 {
 	unsigned int mask = 0;
 
-	/* Tell the kernel which wait queues this fd should sleep on */
+	/* Tell the kernel which wait queues this file should sleep on */
 	poll_wait(file, &fifo_queue, wait);
 
 	mutex_lock(&fifo_lock);
 
 	if (!kfifo_is_empty(&fifo))
-		mask |= POLLIN | POLLRDNORM;  /* readable */
+		mask |= POLLIN | POLLRDNORM;  /* There's something to read */
 	if (!kfifo_is_full(&fifo))
-		mask |= POLLOUT | POLLWRNORM; /* writable */
+		mask |= POLLOUT | POLLWRNORM; /* There's room to write */
 
 	mutex_unlock(&fifo_lock);
 
@@ -112,18 +112,24 @@ const struct file_operations fops = {
 
 int allocate_buffer(uint size)
 {
-	/*
-	 * Keep the size range reasonable and aligned to a power of two
-	 */
-
+	/* Keep the buffer size aligned to a power of two as required by kfifo */
 	size = roundup_pow_of_two(size);
 
-	if (size < FIFO_SIZE_DEFAULT)
-		size = FIFO_SIZE_DEFAULT;
+	/* Avoid excessively big or small buffers */
+	if (size < FIFO_SIZE_MIN)
+		size = FIFO_SIZE_MIN;
 	else if(size > FIFO_SIZE_MAX)
 		size = FIFO_SIZE_MAX;
 
+	/* Update sysfs value to the buffer length that will actually be used */
 	fifo_size = size;
 
+	/*
+	 * Finally, allocate the kfifo buffer
+	 *
+	 * kfifo is used instead of kmalloc as it's a ring buffer that
+	 * automatically allows writes to concatenate if it hasn't been
+	 * read out yet.
+	 */
 	return kfifo_alloc(&fifo, size, GFP_KERNEL);
 }

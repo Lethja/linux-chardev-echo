@@ -2,7 +2,9 @@
 
 #include "common.h"
 
-static int major = 0;      /* Major number for device */
+#define CHR_DEV_NAME    "echo_dev"  /* Character device register name */
+
+static int major = 0;      /* Major number for the echo device */
 static struct class *cls;  /* Device class */
 
 static int __init echo_char_init(void)
@@ -13,7 +15,7 @@ static int __init echo_char_init(void)
 	if ((ret = allocate_buffer(fifo_size)))
 		goto err_print;
 
-	if ((major = register_chrdev(0, CHRDEV_NAME, &fops)) < 0)
+	if ((major = register_chrdev(0, CHR_DEV_NAME, &fops)) < 0)
 		goto err_fifo;
 
 	if (IS_ERR((cls = class_create(CLASS_NAME)))) {
@@ -33,7 +35,7 @@ err_class:
 	class_destroy(cls);
 
 err_chrdev:
-	unregister_chrdev(major, CHRDEV_NAME);
+	unregister_chrdev(major, CHR_DEV_NAME);
 
 err_fifo:
 	kfifo_free(&fifo);
@@ -48,7 +50,7 @@ static void __exit echo_char_exit(void)
 {
 	device_destroy(cls, MKDEV(major, 0));
 	class_destroy(cls);
-	unregister_chrdev(major, CHRDEV_NAME);
+	unregister_chrdev(major, CHR_DEV_NAME);
 	kfifo_free(&fifo);
 	printk(KERN_INFO "Unloaded example echo character device %d:0\n", major);
 }
