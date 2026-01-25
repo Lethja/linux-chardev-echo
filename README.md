@@ -1,113 +1,119 @@
+While learning how to write a character device driver in the Linux kernel, 
+I came across several contradictory examples on how to make character devices across the Internet.
+After figuring it out, I created a small example project demonstrating both methods
+in an example more interesting than `printk()` but still less overwhelming than a real driver
+so that others have an easier time learning in the future.
 
-A small Linux kernel module project that builds **two example “echo” character device drivers**. Both expose a `/dev/echo` device node that behaves like a simple byte buffer:
+This repository contains two Linux kernel modules (`chrdev.c` and `cdev.c`), 
+both of which create the same simple “echo” character device differently.
+Both modules are intended for learning purposes rather than doing something useful. 
 
-- data written to the device can be read back later (FIFO semantics)
-- supports blocking and non-blocking I/O
-- supports `poll()` / `select()` to wait for readability/writability
-- buffer size is configurable via a module parameter
+You can see the differences in the code between the two by running `diff -u chrdev.c cdev.c`.
+Both are valid ways of creating a character device.
 
-This is intended for learning/demonstration purposes.
+Additionally, `common.c` implements buffer and file I/O logic including:
+- A FIFO buffer in the kernel
+- Blocking and non-blocking I/O support
+- `epoll()` / `poll()` / `select()` to wait for readability/writability
+- Configurable buffer size via a module parameter
 
-## What gets built
-
-The Makefile builds two separate kernel modules:
-
-- `echo-chrdev.ko` — registers a character device via the “classic” `register_chrdev()` approach
-- `echo-cdev.ko` — registers via `alloc_chrdev_region()` + `cdev_add()`
-
-They both create the same device node name (`/dev/echo`). Load **only one at a time**.
+Both modules will create the same device node at `/dev/echo` when loaded (assuming udev is set up to do so).
+Loading both will result in the latter not loading as the character device will already exist.
 
 ## Prerequisites
 
 - Linux system with a kernel that supports out-of-tree module builds
-- Kernel headers / build tools installed for your running kernel (e.g. `linux-headers-$(uname -r)` on Debian/Ubuntu)
-- `make`, a C compiler toolchain
+- Kernel headers
+- `make` & `gcc`
 
-Secure Boot note: on many systems, Secure Boot requires signing kernel modules before they can be loaded.
+Secure Boot note: on many systems, 
+Secure Boot requires signing kernel modules before they can be loaded.
 
 ## Build
 
 From the project directory:
-```
-bash
+```bash
 make
 ```
 To clean build artifacts:
-```
-bash
+```bash
 make clean
 ```
+
 ## Load / unload
 
-Load **one** module:
+Load a module:
+```bash
+insmod echo-chrdev.ko
 ```
-bash
-sudo insmod echo-chrdev.ko
-# or:
-sudo insmod echo-cdev.ko
+or
+```bash
+insmod echo-cdev.ko
 ```
+
 Unload:
+```bash
+rmmod echo_chrdev
 ```
-bash
-sudo rmmod echo_chrdev
-# or:
-sudo rmmod echo_cdev
+or
+```bash
+rmmod echo_cdev
 ```
-Check kernel logs:
-```
-bash
-dmesg | tail -n 50
-```
-## Using the device
 
-After loading, you should have:
-
-- `/dev/echo`
+Check kernel logs with:
+```bash
+dmesg
+```
 
 ### Basic echo test
 
 Write some data:
+```bash
+echo "Hello Character Device!" > /dev/echo
 ```
-bash
-echo "hello" | sudo tee /dev/echo >/dev/null
-```
+
 Read it back:
+```bash
+cat /dev/echo
 ```
-bash
-sudo cat /dev/echo
+
+`cat` will keep waiting for more data after it drains the buffer.
+Press `Ctrl + C` to stop it or use the timeout command to stop it automatically:
+```bash
+timeout 5 cat /dev/echo
 ```
+
 ### Non-blocking behavior
 
 If you open the device in non-blocking mode and try to read while empty (or write while full), it will return immediately with `EAGAIN`.
 
-### poll/select
-
-The device supports `poll()`/`select()`:
-- readable when the internal buffer has data
-- writable when the internal buffer has free space
-
-This makes it suitable for simple event-driven experiments.
-
-## Module parameter: `fifo_size`
+## Module parameters
 
 The internal buffer size can be set at module load time:
+```bash
+insmod echo-cdev.ko fifo_size=4096
 ```
-bash
-sudo insmod echo-cdev.ko fifo_size=4096
+or
+```bash
+insmod echo-chrdev.ko fifo_size=4096
 ```
-The effective size is clamped to a reasonable range and rounded to a power of two.
+The buffer size can be anywhere between 64 bytes to 1MB 
+and will automatically be rounded up to the nearest power of two.
 
 You can read the active value via sysfs:
-```
-bash
+```bash
 cat /sys/module/echo_cdev/parameters/fifo_size
-# or if using the other module:
+```
+or
+```bash
 cat /sys/module/echo_chrdev/parameters/fifo_size
 ```
+
 (Only readable at runtime in this project.)
 
 ## Notes / troubleshooting
 
+- Commands like `insmod`, `rmmod` and other programs reading from/writing to `/dev` files usually need to be run as root (or with `sudo`) on many Linux distributions. 
 - If `/dev/echo` doesn’t appear, check `dmesg` for errors.
 - If you see “File exists” / device-node conflicts, ensure you didn’t load both modules at once and that the previous one is unloaded.
 - If `insmod` fails with “Operation not permitted” on a Secure Boot system, you may need to sign the module or disable Secure Boot for development.
