@@ -1,11 +1,12 @@
 #include <linux/device.h>
 
+/* File I/O and buffer allocation logic are shared between both examples in this header and source file */
 #include "common.h"
 
-#define CHR_DEV_NAME    "echo_dev"  /* Character device register name */
+#define CHR_DEV_NAME "echo_dev" /* Character device register name */
 
-static int major = 0;      /* Major number for the echo device */
-static struct class *cls;  /* Device class */
+static int major = 0;           /* Major number for the echo device */
+static struct class *cls;       /* Device class */
 
 static int __init echo_char_init(void)
 {
@@ -28,7 +29,7 @@ static int __init echo_char_init(void)
 		goto err_class;
 	}
 
-	pr_info("Loaded example echo character device module and registered as %d:0\n", major);
+	pr_info("Echo chrdev module loaded as %d:%d\n", major, 0);
 	return 0;
 
 err_class:
@@ -52,7 +53,8 @@ static void __exit echo_char_exit(void)
 	class_destroy(cls);
 	unregister_chrdev(major, CHR_DEV_NAME);
 	kfifo_free(&fifo);
-	printk(KERN_INFO "Unloaded example echo character device %d:0\n", major);
+	printk(KERN_INFO "Unloaded example echo character device %d:%d\n", major, 0);
 }
 
+/* Module init, license, author, etc... are shared between both examples in this header */
 #include "module.h"

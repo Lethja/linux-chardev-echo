@@ -1,10 +1,11 @@
 #include <linux/cdev.h>
 
+/* File I/O and buffer allocation logic are shared between both examples in this header and source file */
 #include "common.h"
 
-static dev_t devt;             /* Encodes major/minor */
-static struct cdev echo_cdev;  /* Character device structure */
-static struct class *cls;      /* Device class */
+static dev_t devt;              /* Encodes major/minor */
+static struct cdev echo_cdev;   /* Character device structure */
+static struct class *cls;       /* Device class */
 
 static int __init echo_char_init(void)
 {
@@ -64,4 +65,5 @@ static void __exit echo_char_exit(void)
 	printk(KERN_INFO "Unloaded example echo character device %u:%u\n", MAJOR(devt), MINOR(devt));
 }
 
+/* Module init, license, author, etc... are shared between both examples in this header */
 #include "module.h"
