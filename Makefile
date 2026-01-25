@@ -1,6 +1,7 @@
-obj-m += echo-chrdev.o echo-cdev.o
+obj-m += echo-chrdev.o echo-cdev.o echo-miscdev.o
 echo-chrdev-objs := chrdev.o common.o
 echo-cdev-objs := cdev.o common.o
+echo-miscdev-objs := miscdev.o common.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

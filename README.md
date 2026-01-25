@@ -1,15 +1,21 @@
 While learning how to write a character device driver in the Linux kernel, 
 I came across several contradictory examples on how to make character devices across the Internet.
-After figuring it out, I created a small example project demonstrating both methods
+After figuring it out, I created a small example project demonstrating each method
 in an example more interesting than `printk()` but still less overwhelming than a real driver
 so that others have an easier time learning in the future.
 
-This repository contains two Linux kernel modules (`chrdev.c` and `cdev.c`), 
-both of which create the same simple “echo” character device differently.
-Both modules are intended for learning purposes rather than doing something useful. 
+This repository contains three Linux kernel modules (`chrdev.c`, `cdev.c` and `miscdev.c`), 
+all of which create the same simple “echo” character device differently.
+All modules are intended for learning purposes rather than doing something useful. 
 
-You can see the differences in the code between the two by running `diff -u chrdev.c cdev.c`.
-Both are valid ways of creating a character device.
+You can see the differences in the code between the two modules by comparing them with `diff`. 
+For example: 
+```bash
+diff -u chrdev.c cdev.c
+```
+
+All modules are valid ways of creating a character device,
+the real question is which one fits a use case best.
 
 Additionally, `common.c` implements buffer and file I/O logic including:
 - A FIFO buffer in the kernel
@@ -17,8 +23,8 @@ Additionally, `common.c` implements buffer and file I/O logic including:
 - `epoll()` / `poll()` / `select()` to wait for readability/writability
 - Configurable buffer size via a module parameter
 
-Both modules will create the same device node at `/dev/echo` when loaded (assuming udev is set up to do so).
-Loading both will result in the latter not loading as the character device will already exist.
+All modules will create the same device node at `/dev/echo` when loaded (assuming udev is set up to do so).
+Loading all will result in the latter not loading as the character device will already exist.
 
 ## Prerequisites
 
@@ -115,7 +121,7 @@ cat /sys/module/echo_chrdev/parameters/fifo_size
 
 - Commands like `insmod`, `rmmod` and other programs reading from/writing to `/dev` files usually need to be run as root (or with `sudo`) on many Linux distributions. 
 - If `/dev/echo` doesn’t appear, check `dmesg` for errors.
-- If you see “File exists” / device-node conflicts, ensure you didn’t load both modules at once and that the previous one is unloaded.
+- If you see “File exists” / device-node conflicts, ensure you didn’t already load another module and unload it if you did.
 - If `insmod` fails with “Operation not permitted” on a Secure Boot system, you may need to sign the module or disable Secure Boot for development.
 
 ## License
