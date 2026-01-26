@@ -20,20 +20,21 @@ the real question is which one fits a use case best.
 Additionally, `common.c` implements buffer and file I/O logic including:
 - A FIFO buffer in the kernel
 - Blocking and non-blocking I/O support
-- `epoll()` / `poll()` / `select()` to wait for readability/writability
+- `epoll()` / `poll()` / `select()` support so user programs can wait for readability/writability
 - Configurable buffer size via a module parameter
 
 All modules will create the same device node at `/dev/echo` when loaded (assuming udev is set up to do so).
-Loading all will result in the latter not loading as the character device will already exist.
+Loading a module while another is loaded will result in an error
+as the character device will already exist.
 
 ## Prerequisites
 
+To build and load these kernel modules, you will need:
 - Linux system with a kernel that supports out-of-tree module builds
 - Kernel headers
 - `make` & `gcc`
 
-Secure Boot note: on many systems, 
-Secure Boot requires signing kernel modules before they can be loaded.
+Note: Secure Boot requires signing kernel modules before they can be loaded.
 
 ## Build
 
@@ -56,6 +57,10 @@ or
 ```bash
 insmod echo-cdev.ko
 ```
+or
+```bash
+insmod echo-miscdev.ko
+```
 
 Unload:
 ```bash
@@ -64,6 +69,10 @@ rmmod echo_chrdev
 or
 ```bash
 rmmod echo_cdev
+```
+or
+```bash
+rmmod echo_miscdev
 ```
 
 Check kernel logs with:
@@ -89,33 +98,37 @@ Press `Ctrl + C` to stop it or use the timeout command to stop it automatically:
 timeout 5 cat /dev/echo
 ```
 
-### Non-blocking behavior
-
-If you open the device in non-blocking mode and try to read while empty (or write while full), it will return immediately with `EAGAIN`.
-
 ## Module parameters
 
 The internal buffer size can be set at module load time:
+```bash
+insmod echo-chrdev.ko fifo_size=4096
+```
+or
 ```bash
 insmod echo-cdev.ko fifo_size=4096
 ```
 or
 ```bash
-insmod echo-chrdev.ko fifo_size=4096
+insmod echo-miscdev.ko fifo_size=4096
 ```
+
 The buffer size can be anywhere between 64 bytes to 1MB 
 and will automatically be rounded up to the nearest power of two.
 
-You can read the active value via sysfs:
+Once a module has been loaded `fifo_size` cannot be set again 
+without unloading the module first, but the current value can be read via sysfs:
+```bash
+cat /sys/module/echo_chrdev/parameters/fifo_size
+```
+or
 ```bash
 cat /sys/module/echo_cdev/parameters/fifo_size
 ```
 or
 ```bash
-cat /sys/module/echo_chrdev/parameters/fifo_size
+cat /sys/module/echo_miscdev/parameters/fifo_size
 ```
-
-(Only readable at runtime in this project.)
 
 ## Notes / troubleshooting
 
