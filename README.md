@@ -17,11 +17,13 @@ diff -u chrdev.c cdev.c
 All modules are valid ways of creating a character device,
 the real question is which one fits a use case best.
 
-Additionally, [common.c](common.c)/[common.h](common.h) implements buffer and file I/O logic including:
-- A FIFO buffer in the kernel
-- Blocking and non-blocking I/O support
-- `epoll()` / `poll()` / `select()` support so user programs can wait for readability/writability
+Additionally, [common.c](common.c) and [common.h](common.h) implement buffer and file I/O logic including:
+- A FIFO memory buffer so that multiple writes can concatenate
+- Blocking and non-blocking I/O support including `epoll()` / `poll()` / `select()` support for programs to sleep and wait for readability/writability
 - Configurable buffer size via a module parameter
+
+The [module.h](module.h) header contains common but required footer boilerplate code between each module
+to keep the character device code itself decluttered.
 
 All modules will create the same device node at `/dev/echo` when loaded (assuming udev is set up to do so).
 Loading a module while another is loaded will result in an error
@@ -29,12 +31,48 @@ as the character device will already exist.
 
 ## Prerequisites
 
-To build and load these kernel modules, you will need:
-- Linux system with a kernel that supports out-of-tree module builds
-- Kernel headers
-- `make` & `gcc`
+### Building
+To build and load these kernel modules, some programs
+from the systems distribution will need to be installed. 
+The following command can be run to determine if the build environment is ready:
+```bash
+if which make gcc > /dev/null; then echo "Program OK"; fi; if [[ -f "${KDIR}/include/linux/kfifo.h" || -f "/lib/modules/$(uname -r)/build/include/linux/kfifo.h" ]]; then echo "Sources OK"; else echo "Sources NOT OK"; fi
+```
 
-Note: Secure Boot requires signing kernel modules before they can be loaded.
+#### GNU Make
+On a GNU/Linux system, this is typically just called `make`.
+On many distributions it is usually installed as part of a "build-essentials"
+type meta-package; that is, if it isn't already installed. 
+Refer to your distributions documentation for further details. 
+
+#### GNU Compiler Collection (GCC)
+This is the default C compiler on many GNU/Linux systems.
+While GCC itself isn't a hard requirement for these modules specifically,
+The kernel targets GNUC99 at the time of writing, 
+so generally having a C compiler capable of these extensions is a good idea
+when building kernel modules. 
+
+#### Linux kernel sources
+
+The kernel sources for the currently running system can often be found at 
+`/lib/modules/$(shell uname -r)/build` 
+or usally can be installed by distribution manager if it isn't already there.
+
+It's also possible to build against another version of the kernel completely
+by downloading and extracting the source tarball for of the desired version
+from https://www.kernel.org/pub/linux/kernel/ 
+and specifying its extraction path in the `KDIR` enviroment variable 
+when calling `make`.
+
+### Loading
+The kernel on the intended system must be configured to support module loading
+and to allow out-of-tree modules to be loaded.
+```bash
+cfg="$(zgrep -h -E '^(CONFIG_MODULES|CONFIG_MODULE_SIG_FORCE)=' /proc/config.gz 2>/dev/null || grep -h -E '^(CONFIG_MODULES|CONFIG_MODULE_SIG_FORCE)=' "/boot/config-$(uname -r)" 2>/dev/null)"; modok="$(printf '%s\n' "$cfg" | awk -F= '$1=="CONFIG_MODULES"{print $2}')"; sigforce="$(printf '%s\n' "$cfg" | awk -F= '$1=="CONFIG_MODULE_SIG_FORCE"{print $2}')"; disabled="$(cat /proc/sys/kernel/modules_disabled 2>/dev/null)"; lockdown="$(cat /sys/kernel/security/lockdown 2>/dev/null | tr -d '\n')"; if [ "$modok" = "y" ] && [ "$disabled" = "0" ] && [ "$sigforce" != "y" ] && ! printf '%s' "$lockdown" | grep -q '\[integrity\]\|\[confidentiality\]'; then echo insmod OK; fi
+```
+Additionally, if Secure Boot is being enforced, 
+then the modules will require signing with an acceptable key 
+before they can be loaded.
 
 ## Build
 
@@ -47,9 +85,9 @@ To clean build artifacts:
 make clean
 ```
 
-## Load / unload
+## Load Module
 
-Load a module:
+Load a module with:
 ```bash
 insmod echo-chrdev.ko
 ```
@@ -62,7 +100,12 @@ or
 insmod echo-miscdev.ko
 ```
 
-Unload:
+### Unload Module
+Check which module is loaded (if any) with:
+```bash
+lsmod | grep echo
+```
+Unload the loaded module with:
 ```bash
 rmmod echo_chrdev
 ```
@@ -75,6 +118,7 @@ or
 rmmod echo_miscdev
 ```
 
+### Logs
 Check kernel logs with:
 ```bash
 dmesg
