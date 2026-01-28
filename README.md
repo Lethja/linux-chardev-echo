@@ -4,7 +4,7 @@ After figuring it out, I created a small example project demonstrating each meth
 in an example more interesting than `printk()` but still less overwhelming than a real driver
 so that others have an easier time learning in the future.
 
-This repository contains three Linux kernel modules (`chrdev.c`, `cdev.c` and `miscdev.c`), 
+This repository contains three Linux kernel modules ([chrdev.c](chrdev.c), [cdev.c](cdev.c) and [miscdev.c](miscdev.c)), 
 all of which create the same simple “echo” character device differently.
 All modules are intended for learning purposes rather than doing something useful. 
 
@@ -17,7 +17,7 @@ diff -u chrdev.c cdev.c
 All modules are valid ways of creating a character device,
 the real question is which one fits a use case best.
 
-Additionally, `common.c` implements buffer and file I/O logic including:
+Additionally, [common.c](common.c)/[common.h](common.h) implements buffer and file I/O logic including:
 - A FIFO buffer in the kernel
 - Blocking and non-blocking I/O support
 - `epoll()` / `poll()` / `select()` support so user programs can wait for readability/writability
