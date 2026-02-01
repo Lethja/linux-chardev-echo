@@ -5,9 +5,9 @@
 
 #define DEVICE_NAME        "echo"  /* Device name */
 #define CLASS_NAME   "echo_class"  /* Class name */
-#define FIFO_SIZE_DEFAULT    1024  /* Default and minimum FIFO size in bytes */
-#define FIFO_SIZE_MIN          64  /* Default and minimum FIFO size in bytes */
-#define FIFO_SIZE_MAX     1048576  /* Maximum possible FIFO size in bytes */
+#define FIFO_SIZE_DEFAULT    1024  /* Default FIFO size in bytes */
+#define FIFO_SIZE_MIN          64  /* Minimum FIFO size in bytes */
+#define FIFO_SIZE_MAX     1048576  /* Maximum FIFO size in bytes */
 
 extern struct kfifo fifo;            /* The FIFO to use as a temporary buffer */
 extern struct mutex fifo_lock;       /* The FIFO mutex */
