@@ -1,5 +1,6 @@
 #include <linux/kfifo.h>
 #include <linux/log2.h>
+#include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/poll.h>
 #include <linux/version.h>
@@ -34,3 +35,4 @@ extern int allocate_buffer(uint size);
 #else
 #define compat_class_create(name) class_create(THIS_MODULE, name)
 #endif
+

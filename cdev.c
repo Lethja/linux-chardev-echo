@@ -1,4 +1,5 @@
 #include <linux/cdev.h>
+#include <linux/device.h>
 
 /* File I/O and buffer allocation logic are shared between both examples in this header and source file */
 #include "common.h"

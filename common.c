@@ -1,12 +1,14 @@
 #include "common.h"
 
+#include <linux/sched.h> /* TASK_KILLABLE and TASK_INTERRUPTIBLE defined here and required for Linux 4 */
+
 unsigned int fifo_size = FIFO_SIZE_DEFAULT; /* The fifo_size parameter */
 
 struct kfifo fifo;
 DEFINE_MUTEX(fifo_lock);
 DECLARE_WAIT_QUEUE_HEAD(fifo_queue);
 
-static unsigned int echo_poll(struct file *file, poll_table *wait) 
+static unsigned int echo_poll(struct file *file, poll_table *wait)
 {
 	unsigned int mask = 0;
 
@@ -26,7 +28,7 @@ static unsigned int echo_poll(struct file *file, poll_table *wait)
 }
 
 
-static ssize_t echo_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos) 
+static ssize_t echo_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos)
 {
 	int ret;
 	unsigned int copied;
