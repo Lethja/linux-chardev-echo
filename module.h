@@ -24,7 +24,10 @@ MODULE_VERSION("1.0");
 
 MODULE_PARM_DESC(fifo_size, "Echo buffer size in bytes");
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,32)
+/**
+ * The earliest known point of kernel_param_ops structure is 2.6.37
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,37)
 
 static int fifo_size_get(char *buf, const struct kernel_param *kp)
 {
