@@ -19,7 +19,7 @@ static int __init echo_char_init(void)
 	if ((major = register_chrdev(0, CHR_DEV_NAME, &fops)) < 0)
 		goto err_fifo;
 
-	if (IS_ERR((cls = class_create(CLASS_NAME)))) {
+	if (IS_ERR((cls = compat_class_create(CLASS_NAME)))) {
 		ret = PTR_ERR(cls);
 		goto err_chrdev;
 	}

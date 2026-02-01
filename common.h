@@ -2,6 +2,7 @@
 #include <linux/log2.h>
 #include <linux/mutex.h>
 #include <linux/poll.h>
+#include <linux/version.h>
 
 #define DEVICE_NAME        "echo"  /* Device name */
 #define CLASS_NAME   "echo_class"  /* Class name */
@@ -22,3 +23,14 @@ extern const struct file_operations fops;
  * @return The kfifo_alloc return
  */
 extern int allocate_buffer(uint size);
+
+/**
+ * Macro function that wraps `class_create()` for compatiibilty.
+ * When building against Linux 6.3 or lower class_create must specify `THIS_MODULE`.
+ * On later versions of the kernel only the class name is needed.
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+#define compat_class_create(name) class_create(name)
+#else
+#define compat_class_create(name) class_create(THIS_MODULE, name)
+#endif

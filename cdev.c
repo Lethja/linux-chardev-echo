@@ -24,7 +24,7 @@ static int __init echo_char_init(void)
 	if ((ret = cdev_add(&echo_cdev, devt, 1)) < 0)
 		goto err_chrdev;
 
-	if (IS_ERR((cls = class_create(CLASS_NAME)))) {
+	if (IS_ERR((cls = compat_class_create(CLASS_NAME)))) {
 		ret = PTR_ERR(cls);
 		goto err_cdev;
 	}
