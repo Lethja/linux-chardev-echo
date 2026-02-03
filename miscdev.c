@@ -25,7 +25,7 @@ static int __init echo_char_init(void)
 	return 0;
 
 err_fifo:
-	kfifo_free(&fifo);
+	free_buffer(&fifo);
 
 err_print:
 	pr_err("Loaded example echo character device module failed with %d", ret);
@@ -36,7 +36,7 @@ err_print:
 static void __exit echo_char_exit(void)
 {
 	misc_deregister(&misc_dev);
-	kfifo_free(&fifo);
+	free_buffer(&fifo);
 	printk(KERN_INFO "Unloaded example echo character device %d:%d\n", MISC_MAJOR, misc_dev.minor);
 }
 

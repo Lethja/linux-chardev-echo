@@ -39,7 +39,7 @@ err_chrdev:
 	unregister_chrdev(major, CHR_DEV_NAME);
 
 err_fifo:
-	kfifo_free(&fifo);
+	free_buffer(&fifo);
 
 err_print:
 	pr_err("Loaded example echo character device module failed with %d", ret);
@@ -52,7 +52,7 @@ static void __exit echo_char_exit(void)
 	device_destroy(cls, MKDEV(major, 0));
 	class_destroy(cls);
 	unregister_chrdev(major, CHR_DEV_NAME);
-	kfifo_free(&fifo);
+	free_buffer(&fifo);
 	printk(KERN_INFO "Unloaded example echo character device %d:%d\n", major, 0);
 }
 

@@ -26,6 +26,12 @@ extern const struct file_operations fops;
 extern int allocate_buffer(uint size);
 
 /**
+ * Wrapper around kfifo_free to be compatibe with older kernels versions
+ * @param fifo The buffer to free
+ */
+extern void free_buffer(struct kfifo *fifo);
+
+/**
  * Macro function that wraps `class_create()` for compatiibilty.
  * When building against Linux 6.3 or lower class_create must specify `THIS_MODULE`.
  * On later versions of the kernel only the class name is needed.

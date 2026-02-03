@@ -135,3 +135,7 @@ int allocate_buffer(uint size)
 	 */
 	return kfifo_alloc(&fifo, size, GFP_KERNEL);
 }
+
+void free_buffer(struct kfifo *fifo) {
+	kfifo_free(fifo);
+}
