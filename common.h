@@ -5,6 +5,8 @@
 #include <linux/poll.h>
 #include <linux/version.h>
 
+#include "compat.h"
+
 #define DEVICE_NAME        "echo"  /* Device name */
 #define CLASS_NAME   "echo_class"  /* Class name */
 #define FIFO_SIZE_DEFAULT    1024  /* Default FIFO size in bytes */
@@ -30,15 +32,3 @@ extern int allocate_buffer(uint size);
  * @param fifo The buffer to free
  */
 extern void free_buffer(struct kfifo *fifo);
-
-/**
- * Macro function that wraps `class_create()` for compatiibilty.
- * When building against Linux 6.3 or lower class_create must specify `THIS_MODULE`.
- * On later versions of the kernel only the class name is needed.
- */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
-#define compat_class_create(name) class_create(name)
-#else
-#define compat_class_create(name) class_create(THIS_MODULE, name)
-#endif
-

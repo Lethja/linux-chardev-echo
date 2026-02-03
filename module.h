@@ -5,15 +5,6 @@
 
 #include <linux/module.h>
 
-/** Macro function that wraps `sysfs_emit()` for compatibility.
- * When building against Linux 4.11 or lower sysfs_emit is not available.
- */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
-#define compat_sysfs_emit(buf, fmt, ...) sysfs_emit(buf, fmt, ##__VA_ARGS__)
-#else
-#define compat_sysfs_emit(buf, fmt, ...) sprintf(buf, fmt, ##__VA_ARGS__)
-#endif
-
 module_init(echo_char_init);
 module_exit(echo_char_exit);
 
