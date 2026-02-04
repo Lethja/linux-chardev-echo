@@ -133,7 +133,7 @@ int allocate_buffer(uint size)
 	 * automatically allows writes to concatenate if it hasn't been
 	 * read out yet.
 	 */
-	return kfifo_alloc(&fifo, size, GFP_KERNEL);
+	return compat_kfifo_alloc(&fifo, size, GFP_KERNEL);
 }
 
 void free_buffer(struct kfifo *fifo) {

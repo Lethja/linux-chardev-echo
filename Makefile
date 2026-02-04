@@ -8,9 +8,9 @@ MDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 obj-m += echo-chrdev.o echo-cdev.o echo-miscdev.o
 
 # The sources used in each module (.c -> .o)
-echo-chrdev-objs := chrdev.o common.o
-echo-cdev-objs := cdev.o common.o
-echo-miscdev-objs := miscdev.o common.o
+echo-chrdev-objs := chrdev.o common.o compat.o
+echo-cdev-objs := cdev.o common.o compat.o
+echo-miscdev-objs := miscdev.o common.o compat.o
 
 # Compile and link all kernel modules
 all:
