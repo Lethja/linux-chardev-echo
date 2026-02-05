@@ -18,6 +18,52 @@ static inline unsigned int compat_kfifo_avail(struct kfifo *fifo)
 	return fifo->size - compat_kfifo_len(fifo);
 }
 
+static inline unsigned int compat_kfifo_in_bytes(struct kfifo *fifo, const unsigned char *src, unsigned int len)
+{
+	unsigned int l;
+	unsigned int off;
+
+	if (!len)
+		return 0;
+
+	len = min(len, compat_kfifo_avail(fifo));
+
+	off = fifo->in & (fifo->size - 1);
+	l = min(len, fifo->size - off);
+
+	memcpy(fifo->buffer + off, src, l);
+	memcpy(fifo->buffer, src + l, len - l);
+
+	/*
+	 * Paired with reader updating fifo->out. If you need strict SMP safety
+	 * beyond single-producer/single-consumer, add proper barriers/locking.
+	 */
+	fifo->in += len;
+
+	return len;
+}
+
+static inline unsigned int compat_kfifo_out_bytes(struct kfifo *fifo, unsigned char *dst, unsigned int len)
+{
+	unsigned int l;
+	unsigned int off;
+
+	if (!len)
+		return 0;
+
+	len = min(len, compat_kfifo_len(fifo));
+
+	off = fifo->out & (fifo->size - 1);
+	l = min(len, fifo->size - off);
+
+	memcpy(dst, fifo->buffer + off, l);
+	memcpy(dst + l, fifo->buffer, len - l);
+
+	fifo->out += len;
+
+	return len;
+}
+
 int compat_kfifo_alloc(struct kfifo *fifo, unsigned int size, gfp_t mode)
 {
 	unsigned int sz;
@@ -105,7 +151,7 @@ int kfifo_from_user(struct kfifo *fifo, const void __user *from, unsigned long l
 			return -EFAULT;
 		}
 
-		done += kfifo_in(fifo, tmp, chunk);
+		done += compat_kfifo_in_bytes(fifo, tmp, chunk);
 	}
 
 	kfree(tmp);
@@ -150,7 +196,7 @@ int kfifo_to_user(struct kfifo *fifo, void __user *to, unsigned long len, unsign
 		if (chunk > chunk_max)
 			chunk = chunk_max;
 
-		pulled = kfifo_out(fifo, tmp, chunk);
+		pulled = compat_kfifo_out_bytes(fifo, tmp, chunk);
 		if (!pulled)
 			break;
 
