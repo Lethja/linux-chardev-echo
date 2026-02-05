@@ -33,12 +33,15 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
 
 #define compat_kfifo_alloc(fifo, size, mode) kfifo_alloc(fifo, size, mode)
+#define compat_kfifo_free(fifo) kfifo_free(fifo)
 
 #else
 
 #include <linux/kfifo.h>
 
 extern int compat_kfifo_alloc(struct kfifo *fifo, unsigned int size, gfp_t mask);
+
+extern void compat_kfifo_free(struct kfifo *fifo);
 
 extern int kfifo_is_empty(struct kfifo *fifo);
 

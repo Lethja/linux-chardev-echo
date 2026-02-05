@@ -137,5 +137,5 @@ int allocate_buffer(uint size)
 }
 
 void free_buffer(struct kfifo *fifo) {
-	kfifo_free(fifo);
+	compat_kfifo_free(fifo);
 }
