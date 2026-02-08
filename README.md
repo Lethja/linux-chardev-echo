@@ -180,7 +180,3 @@ cat /sys/module/echo_miscdev/parameters/fifo_size
 - If `/dev/echo` doesn’t appear, check `dmesg` for errors.
 - If you see “File exists” / device-node conflicts, ensure you didn’t already load another module and unload it if you did.
 - If `insmod` fails with “Operation not permitted” on a Secure Boot system, you may need to sign the module or disable Secure Boot for development.
-
-## License
-
-GPL-2.0 (kernel module).
