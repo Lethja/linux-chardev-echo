@@ -28,7 +28,7 @@ extern const struct file_operations fops;
 extern int allocate_buffer(uint size);
 
 /**
- * Wrapper around kfifo_free to be compatibe with older kernels versions
+ * Wrapper around kfifo_free to be compatible with older kernels versions
  * @param fifo The buffer to free
  */
 extern void free_buffer(struct kfifo *fifo);

@@ -66,5 +66,5 @@ static void __exit echo_char_exit(void)
 	printk(KERN_INFO "Unloaded example echo character device %u:%u\n", MAJOR(devt), MINOR(devt));
 }
 
-/* Module init, license, author, etc... are shared between both examples in this header */
+/* Module init, license, author, etc... boilerplate are shared between all examples in this header */
 #include "module.h"

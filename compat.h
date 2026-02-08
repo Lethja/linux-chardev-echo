@@ -2,11 +2,11 @@
 
 /*
  * This header contains wrappers around different ways that the kfifo functions changes throughout the kernels history
- * Some helper functions aren't avalible in older kernels are reimplemented
+ * Some helper functions aren't available in older kernels are reimplemented
  */
 
 /**
- * Macro function that wraps `class_create()` for compatiibilty.
+ * Macro function that wraps `class_create()` for compatibility.
  * When building against Linux 6.3 or lower class_create must specify `THIS_MODULE`.
  * On later versions of the kernel only the class name is needed.
  */
@@ -27,7 +27,7 @@
 #endif
 
 /**
- * Macro function that wraps `kfifo_alloc()` for compatibilty.
+ * Macro function that wraps `kfifo_alloc()` for compatibility.
  * When building against Linux 2.6.32 or lower kfifo_alloc has different parameters and return value.
  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
