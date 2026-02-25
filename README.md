@@ -30,7 +30,7 @@ allow these modules to be built for modern and older kernel versions alike
 by wrapping API differences behind a small shim.
 
 The oldest kernel tested is 2.6.32 (that shipped with Debian 6 Squeeze)  
-while the latest kernel tested is 6.18.9 (latest stable release at the time of writing).
+while the latest kernel tested is 6.19.3 (latest stable release at the time of writing).
 
 All modules will create the same device node at `/dev/echo` when loaded (assuming udev is set up to do so).
 Loading a module while another is loaded will result in an error
